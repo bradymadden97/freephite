@@ -61,8 +61,8 @@
     "dist"
   ],
   "bin": {
-    "graphite": "dist/src/index.js",
-    "gt": "dist/src/index.js"
+    "freephite": "dist/src/index.js",
+    "fp": "dist/src/index.js"
   },
   "devDependencies": {
     "@types/chai": "^4.3.1",
