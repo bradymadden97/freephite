@@ -48,12 +48,12 @@ export abstract class AbstractScene {
     }
   }
 
-  public getContext(): TContext {
+  public getContext(interactive = false): TContext {
     const oldDir = process.cwd();
     process.chdir(this.tmpDir.name);
     const context = initContext(
       initContextLite({
-        interactive: false,
+        interactive,
         quiet: !process.env.DEBUG,
         debug: !!process.env.DEBUG,
       }),

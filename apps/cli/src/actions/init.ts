@@ -1,11 +1,6 @@
 import chalk from 'chalk';
-import prompts from 'prompts';
 import { TContext } from '../lib/context';
-import {
-  ExitFailedError,
-  KilledError,
-  PreconditionsFailedError,
-} from '../lib/errors';
+import { ExitFailedError, PreconditionsFailedError } from '../lib/errors';
 import { suggest } from '../lib/utils/prompts_helpers';
 import { checkoutBranch } from './checkout_branch';
 import { trackBranchInteractive } from './track_branch';
@@ -73,25 +68,18 @@ async function selectTrunkBranch(
   }
 
   return (
-    await prompts(
-      {
-        type: 'autocomplete',
-        name: 'branch',
-        message: `Select a trunk branch, which you open pull requests against${
-          inferredTrunk ? ` - inferred trunk ${chalk.green(inferredTrunk)}` : ''
-        } (autocomplete or arrow keys)`,
-        choices: allBranchNames.map((b) => {
-          return { title: b, value: b };
-        }),
-        ...(inferredTrunk ? { initial: inferredTrunk } : {}),
-        suggest,
-      },
-      {
-        onCancel: () => {
-          throw new KilledError();
-        },
-      }
-    )
+    await context.prompts({
+      type: 'autocomplete',
+      name: 'branch',
+      message: `Select a trunk branch, which you open pull requests against${
+        inferredTrunk ? ` - inferred trunk ${chalk.green(inferredTrunk)}` : ''
+      } (autocomplete or arrow keys)`,
+      choices: allBranchNames.map((b) => {
+        return { title: b, value: b };
+      }),
+      ...(inferredTrunk ? { initial: inferredTrunk } : {}),
+      suggest,
+    })
   ).branch;
 }
 
@@ -115,19 +103,12 @@ async function branchOnboardingFlow(context: TContext) {
   );
   if (
     !(
-      await prompts(
-        {
-          type: 'confirm',
-          name: 'value',
-          message: `Would you like to start tracking existing branches to create your first stack?`,
-          initial: false,
-        },
-        {
-          onCancel: () => {
-            throw new KilledError();
-          },
-        }
-      )
+      await context.prompts({
+        type: 'confirm',
+        name: 'value',
+        message: `Would you like to start tracking existing branches to create your first stack?`,
+        initial: false,
+      })
     ).value
   ) {
     return;

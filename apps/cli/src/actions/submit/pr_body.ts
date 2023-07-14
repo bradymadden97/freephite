@@ -1,8 +1,6 @@
 import fs from 'fs-extra';
-import prompts from 'prompts';
 import tmp from 'tmp';
 import { TContext } from '../../lib/context';
-import { KilledError } from '../../lib/errors';
 import { getPRTemplate } from '../../lib/utils/pr_templates';
 
 export async function getPRBody(
@@ -14,7 +12,7 @@ export async function getPRBody(
 ): Promise<string> {
   const priorSubmitBody = context.engine.getPrInfo(args.branchName)?.body;
   const { inferredBody, skipDescription } = inferPRBody(
-    { branchName: args.branchName, template: await getPRTemplate() },
+    { branchName: args.branchName, template: await getPRTemplate(context) },
     context
   );
 
@@ -25,50 +23,36 @@ export async function getPRBody(
   const usePriorSubmitBody =
     !!priorSubmitBody &&
     (
-      await prompts(
-        {
-          type: 'confirm',
-          name: 'confirm',
-          initial: true,
-          message: 'Detected a PR body from an aborted submit, use it?',
-        },
-        {
-          onCancel: () => {
-            throw new KilledError();
-          },
-        }
-      )
+      await context.prompts({
+        type: 'confirm',
+        name: 'confirm',
+        initial: true,
+        message: 'Detected a PR body from an aborted submit, use it?',
+      })
     ).confirm;
 
   const body = usePriorSubmitBody ? priorSubmitBody : inferredBody;
 
   if (args.editPRFieldsInline === undefined) {
-    const response = await prompts(
-      {
-        type: 'select',
-        name: 'body',
-        message: 'Body',
-        choices: [
-          {
-            title: `Edit Body (using ${context.userConfig.getEditor()})`,
-            value: 'edit',
-          },
-          {
-            title: `Skip (${
-              usePriorSubmitBody
-                ? `use body from aborted submit`
-                : skipDescription
-            })`,
-            value: 'skip',
-          },
-        ],
-      },
-      {
-        onCancel: () => {
-          throw new KilledError();
+    const response = await context.prompts({
+      type: 'select',
+      name: 'body',
+      message: 'Body',
+      choices: [
+        {
+          title: `Edit Body (using ${context.userConfig.getEditor()})`,
+          value: 'edit',
         },
-      }
-    );
+        {
+          title: `Skip (${
+            usePriorSubmitBody
+              ? `use body from aborted submit`
+              : skipDescription
+          })`,
+          value: 'skip',
+        },
+      ],
+    });
     if (response.body === 'skip') {
       return body;
     }

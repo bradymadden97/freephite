@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import prompts from 'prompts';
 import { TContext } from '../../lib/context';
 import { SCOPE } from '../../lib/engine/scope_spec';
 import { KilledError } from '../../lib/errors';
@@ -123,21 +122,14 @@ export async function pullTrunk(
     force ||
     (context.interactive &&
       (
-        await prompts(
-          {
-            type: 'confirm',
-            name: 'value',
-            message: `Overwrite ${chalk.yellow(
-              context.engine.trunk
-            )} with the version from remote?`,
-            initial: true,
-          },
-          {
-            onCancel: () => {
-              throw new KilledError();
-            },
-          }
-        )
+        await context.prompts({
+          type: 'confirm',
+          name: 'value',
+          message: `Overwrite ${chalk.yellow(
+            context.engine.trunk
+          )} with the version from remote?`,
+          initial: true,
+        })
       ).value)
   ) {
     context.engine.resetTrunkToRemote();

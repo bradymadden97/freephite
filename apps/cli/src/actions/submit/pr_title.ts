@@ -1,6 +1,4 @@
-import prompts from 'prompts';
 import { TContext } from '../../lib/context';
-import { KilledError } from '../../lib/errors';
 
 export async function getPRTitle(
   args: {
@@ -19,18 +17,11 @@ export async function getPRTitle(
     return title;
   }
 
-  const response = await prompts(
-    {
-      type: 'text',
-      name: 'title',
-      message: 'Title',
-      initial: title,
-    },
-    {
-      onCancel: () => {
-        throw new KilledError();
-      },
-    }
-  );
+  const response = await context.prompts({
+    type: 'text',
+    name: 'title',
+    message: 'Title',
+    initial: title,
+  });
   return response.title ?? title;
 }

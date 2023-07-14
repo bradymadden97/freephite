@@ -37,6 +37,7 @@ import { Icon } from "./Icon";
 import { notEmpty } from "@withgraphite/gti-shared";
 import { observer } from "mobx-react-lite";
 import { DeleteBranchOperation } from "./operations/DeleteBranchOperation";
+import { diffSummary } from "./codeReview/CodeReviewInfo";
 
 function isDraggablePreview(previewType?: CommitPreview): boolean {
   switch (previewType) {
@@ -94,6 +95,7 @@ export const Commit = memo(
       hasChildren: boolean;
     }) => {
       const isPublic = commit.partOfTrunk;
+      const diffInfoResult = diffSummary(commit.pr?.number).get();
 
       const handlePreviewedOperation = useRunPreviewedOperation();
       const runOperation = useRunOperation();
@@ -270,7 +272,10 @@ export const Commit = memo(
                 )}
                 <CommitDate date={new Date(commit.date)} />
               </span>
-              {!isPublic && (commit.needsSubmit || !commit.pr) ? (
+              {!isPublic &&
+              (commit.needsSubmit || !commit.pr) &&
+              (!diffInfoResult.value ||
+                diffInfoResult.value.state === "OPEN") ? (
                 <div className="commit-needs-restack">
                   <Tooltip title={"This branch needs to be submitted"}>
                     <Icon icon="cloud-upload" />

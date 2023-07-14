@@ -1,9 +1,7 @@
 import chalk from 'chalk';
-import prompts from 'prompts';
 import stripAnsi from 'strip-ansi';
 import { GRAPHITE_COLORS } from '../lib/colors';
 import { TContext } from '../lib/context';
-import { KilledError } from '../lib/errors';
 import { clearPromptResultLine, suggest } from '../lib/utils/prompts_helpers';
 import { getBranchInfo } from './show_branch';
 
@@ -116,21 +114,14 @@ export async function interactiveBranchSelection(
       : choices.length - 1;
 
   const chosenBranch = (
-    await prompts(
-      {
-        type: 'autocomplete',
-        name: 'branch',
-        message: opts.message,
-        choices,
-        initial,
-        suggest,
-      },
-      {
-        onCancel: () => {
-          throw new KilledError();
-        },
-      }
-    )
+    await context.prompts({
+      type: 'autocomplete',
+      name: 'branch',
+      message: opts.message,
+      choices,
+      initial,
+      suggest,
+    })
   ).branch;
 
   clearPromptResultLine();

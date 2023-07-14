@@ -1,7 +1,5 @@
 import { default as chalk } from 'chalk';
-import prompts from 'prompts';
 import { TContext } from '../../lib/context';
-import { KilledError } from '../../lib/errors';
 import { deleteBranchAction, isSafeToDelete } from '../delete_branch';
 
 /**
@@ -204,19 +202,12 @@ async function shouldDeleteBranch(
 
   return (
     (
-      await prompts(
-        {
-          type: 'confirm',
-          name: 'value',
-          message: `${shouldDelete.reason}. Delete it?`,
-          initial: true,
-        },
-        {
-          onCancel: () => {
-            throw new KilledError();
-          },
-        }
-      )
+      await context.prompts({
+        type: 'confirm',
+        name: 'value',
+        message: `${shouldDelete.reason}. Delete it?`,
+        initial: true,
+      })
     ).value === true
   );
 }

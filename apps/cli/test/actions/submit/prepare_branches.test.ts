@@ -23,7 +23,7 @@ describe(`(${scene}): correctly get PR information for branches`, function () {
     scene.repo.createChange('a');
     scene.repo.runCliCommand([`branch`, `create`, `a`, `-m`, message]);
 
-    const context = scene.getContext();
+    const context = scene.getContext(true);
 
     const updatedTitle = 'updatedTitle';
     prompts.inject([updatedTitle]);

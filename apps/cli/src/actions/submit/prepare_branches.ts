@@ -212,7 +212,10 @@ async function getPRCreationInfo(
     context.engine.upsertPrInfo(args.branchName, submitInfo);
   }
 
-  const reviewers = await getReviewers(args.reviewers);
+  const reviewers = await getReviewersMaybeInteractively(
+    args.reviewers,
+    context
+  );
 
   const createAsDraft = args.publish
     ? false
@@ -277,7 +280,10 @@ async function getPRUpdateInfo(
     }
   }
 
-  const reviewers = await getReviewers(args.reviewers);
+  const reviewers = await getReviewersMaybeInteractively(
+    args.reviewers,
+    context
+  );
 
   const draft = args.draft ? true : args.publish ? false : undefined;
 
@@ -287,4 +293,21 @@ async function getPRUpdateInfo(
     reviewers,
     draft,
   };
+}
+
+async function getReviewersMaybeInteractively(
+  reviewers: string | undefined,
+  context: TContext
+): Promise<string[]> {
+  if (reviewers === '') {
+    const response = await context.prompts({
+      type: 'list',
+      name: 'reviewers',
+      message: 'Reviewers (comma-separated GitHub usernames)',
+      separator: ',',
+    });
+    return response.reviewers;
+  }
+
+  return getReviewers(reviewers);
 }

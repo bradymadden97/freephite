@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import prompts from 'prompts';
 import { TContext } from '../lib/context';
 import { ExitFailedError, KilledError } from '../lib/errors';
 import { suggest } from '../lib/utils/prompts_helpers';
@@ -29,20 +28,13 @@ export async function trackBranchInteractive(
   }
 
   const branchName = (
-    await prompts(
-      {
-        type: 'autocomplete',
-        name: 'value',
-        message: `Enter a branch to track as a child of ${parentBranchName} (autocomplete or arrow keys)`,
-        choices,
-        suggest,
-      },
-      {
-        onCancel: () => {
-          throw new KilledError();
-        },
-      }
-    )
+    await context.prompts({
+      type: 'autocomplete',
+      name: 'value',
+      message: `Enter a branch to track as a child of ${parentBranchName} (autocomplete or arrow keys)`,
+      choices,
+      suggest,
+    })
   ).value;
 
   if (!branchName) {
@@ -123,20 +115,13 @@ export async function trackStack(
     choices.length === 1 || force
       ? choices[0].value
       : (
-          await prompts(
-            {
-              type: 'autocomplete',
-              name: 'branch',
-              message: `Select a parent for ${branchName} (autocomplete or arrow keys)`,
-              choices,
-              suggest,
-            },
-            {
-              onCancel: () => {
-                throw new KilledError();
-              },
-            }
-          )
+          await context.prompts({
+            type: 'autocomplete',
+            name: 'branch',
+            message: `Select a parent for ${branchName} (autocomplete or arrow keys)`,
+            choices,
+            suggest,
+          })
         ).branch;
 
   await trackStack({ branchName: parentBranchName, force }, context);
@@ -183,20 +168,13 @@ export async function trackBranch(
       {
         branchName,
         parentBranchName: (
-          await prompts(
-            {
-              type: 'autocomplete',
-              name: 'branch',
-              message: `Select a parent for ${branchName} (autocomplete or arrow keys)`,
-              choices,
-              suggest,
-            },
-            {
-              onCancel: () => {
-                throw new KilledError();
-              },
-            }
-          )
+          await context.prompts({
+            type: 'autocomplete',
+            name: 'branch',
+            message: `Select a parent for ${branchName} (autocomplete or arrow keys)`,
+            choices,
+            suggest,
+          })
         ).branch,
       },
       context

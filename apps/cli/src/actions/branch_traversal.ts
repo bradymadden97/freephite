@@ -1,7 +1,6 @@
 import chalk from 'chalk';
-import prompts from 'prompts';
 import { TContext } from '../lib/context';
-import { ExitFailedError, KilledError } from '../lib/errors';
+import { ExitFailedError } from '../lib/errors';
 import { suggest } from '../lib/utils/prompts_helpers';
 import { checkoutBranch } from './checkout_branch';
 
@@ -119,22 +118,15 @@ async function handleMultipleChildren(children: string[], context: TContext) {
     );
   }
   return (
-    await prompts(
-      {
-        type: 'autocomplete',
-        name: 'value',
-        message:
-          'Multiple branches found at the same level. Select a branch to guide the navigation (autocomplete or arrow keys)',
-        choices: children.map((b) => {
-          return { title: b, value: b };
-        }),
-        suggest,
-      },
-      {
-        onCancel: () => {
-          throw new KilledError();
-        },
-      }
-    )
+    await context.prompts({
+      type: 'autocomplete',
+      name: 'value',
+      message:
+        'Multiple branches found at the same level. Select a branch to guide the navigation (autocomplete or arrow keys)',
+      choices: children.map((b) => {
+        return { title: b, value: b };
+      }),
+      suggest,
+    })
   ).value;
 }

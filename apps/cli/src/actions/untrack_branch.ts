@@ -1,7 +1,6 @@
 import chalk from 'chalk';
-import prompts from 'prompts';
 import { TContext } from '../lib/context';
-import { ExitFailedError, KilledError } from '../lib/errors';
+import { ExitFailedError } from '../lib/errors';
 
 export async function untrackBranch(
   { branchName, force }: { branchName: string; force: boolean },
@@ -55,21 +54,14 @@ async function shouldUntrackBranchWithChildren(
     force ||
     (context.interactive &&
       (
-        await prompts(
-          {
-            type: 'confirm',
-            name: 'value',
-            message: `Are you sure you want to untrack ${chalk.yellow(
-              branchName
-            )} and all of its upstack branches?`,
-            initial: false,
-          },
-          {
-            onCancel: () => {
-              throw new KilledError();
-            },
-          }
-        )
+        await context.prompts({
+          type: 'confirm',
+          name: 'value',
+          message: `Are you sure you want to untrack ${chalk.yellow(
+            branchName
+          )} and all of its upstack branches?`,
+          initial: false,
+        })
       ).value)
   );
 }

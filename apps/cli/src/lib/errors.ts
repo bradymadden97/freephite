@@ -7,6 +7,13 @@ export class ExitFailedError extends Error {
   }
 }
 
+export class NonInteractiveError extends Error {
+  constructor() {
+    super('Cannot perform interactive operation in non-interactive mode.');
+    this.name = 'NonInteractive';
+  }
+}
+
 export class RebaseConflictError extends Error {
   constructor() {
     super(`Hit a conflict during rebase.`);

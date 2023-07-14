@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import prompts from 'prompts';
 import { GRAPHITE_COLORS } from '../lib/colors';
 import { TContext } from '../lib/context';
 import { SCOPE } from '../lib/engine/scope_spec';
@@ -46,29 +45,22 @@ export async function splitCurrentBranch(
     args.style ??
     (context.engine.getAllCommits(branchToSplit, 'SHA').length > 1
       ? (
-          await prompts(
-            {
-              type: 'select',
-              name: 'value',
-              message: `How would you like to split ${branchToSplit}?`,
-              choices: [
-                {
-                  title: 'By commit - slice up the history of this branch.',
-                  value: 'commit',
-                },
-                {
-                  title: 'By hunk - split into new single-commit branches.',
-                  value: 'hunk',
-                },
-                { title: 'Cancel this command (Ctrl+C).', value: 'abort' },
-              ],
-            },
-            {
-              onCancel: () => {
-                throw new KilledError();
+          await context.prompts({
+            type: 'select',
+            name: 'value',
+            message: `How would you like to split ${branchToSplit}?`,
+            choices: [
+              {
+                title: 'By commit - slice up the history of this branch.',
+                value: 'commit',
               },
-            }
-          )
+              {
+                title: 'By hunk - split into new single-commit branches.',
+                value: 'hunk',
+              },
+              { title: 'Cancel this command (Ctrl+C).', value: 'abort' },
+            ],
+          })
         ).value
       : 'hunk');
 
@@ -113,6 +105,7 @@ async function splitByCommit(
     readableCommits,
     numChildren,
     parentBranchName,
+    context,
   });
   const branchNames: string[] = [];
   for (let i = 0; i < branchPoints.length; i++) {
@@ -165,10 +158,12 @@ async function getBranchPoints({
   readableCommits,
   numChildren,
   parentBranchName,
+  context,
 }: {
   readableCommits: string[];
   numChildren: number;
   parentBranchName: string;
+  context: TContext;
 }): Promise<number[]> {
   // Array where nth index is whether we want a branch pointing to nth commit
   const isBranchPoint: boolean[] = readableCommits.map((_, idx) => idx === 0);
@@ -182,68 +177,61 @@ async function getBranchPoints({
     const showChildrenLine = numChildren > 0;
     lastValue = parseInt(
       (
-        await prompts(
-          {
-            type: 'select',
-            name: 'value',
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore the types are out of date
-            warn: ' ',
-            message: `Toggle a commit to split the branch there.`,
-            hint: 'Arrow keys and return/space. Select confirm to finish.',
-            initial: lastValue + (showChildrenLine ? 1 : 0),
-            choices: [
-              ...(showChildrenLine
-                ? [
-                    {
-                      title: chalk.reset(
-                        `${' '.repeat(10)}${chalk.dim(
-                          `${numChildren} ${
-                            numChildren > 1 ? 'children' : 'child'
-                          }`
-                        )}`
-                      ),
-                      disabled: true,
-                      value: '0', // noop
-                    },
-                  ]
-                : []),
-              ...readableCommits.map((commit, index) => {
-                const shouldDisplayBranchNumber = isBranchPoint[index];
-                if (shouldDisplayBranchNumber) {
-                  branchNumber--;
-                }
+        await context.prompts({
+          type: 'select',
+          name: 'value',
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore the types are out of date
+          warn: ' ',
+          message: `Toggle a commit to split the branch there.`,
+          hint: 'Arrow keys and return/space. Select confirm to finish.',
+          initial: lastValue + (showChildrenLine ? 1 : 0),
+          choices: [
+            ...(showChildrenLine
+              ? [
+                  {
+                    title: chalk.reset(
+                      `${' '.repeat(10)}${chalk.dim(
+                        `${numChildren} ${
+                          numChildren > 1 ? 'children' : 'child'
+                        }`
+                      )}`
+                    ),
+                    disabled: true,
+                    value: '0', // noop
+                  },
+                ]
+              : []),
+            ...readableCommits.map((commit, index) => {
+              const shouldDisplayBranchNumber = isBranchPoint[index];
+              if (shouldDisplayBranchNumber) {
+                branchNumber--;
+              }
 
-                const titleColor =
-                  GRAPHITE_COLORS[(branchNumber - 1) % GRAPHITE_COLORS.length];
-                const titleText = `${
-                  shouldDisplayBranchNumber
-                    ? `Branch ${branchNumber}: `
-                    : ' '.repeat(10)
-                }${commit}`;
+              const titleColor =
+                GRAPHITE_COLORS[(branchNumber - 1) % GRAPHITE_COLORS.length];
+              const titleText = `${
+                shouldDisplayBranchNumber
+                  ? `Branch ${branchNumber}: `
+                  : ' '.repeat(10)
+              }${commit}`;
 
-                const title = chalk.rgb(...titleColor)(titleText);
-                return { title, value: '' + index };
-              }),
-              {
-                title: chalk.reset(
-                  `${' '.repeat(10)}${chalk.dim(parentBranchName)}`
-                ),
-                disabled: true,
-                value: '0', // noop
-              },
-              {
-                title: `${' '.repeat(10)}Confirm`,
-                value: '-1', // done
-              },
-            ],
-          },
-          {
-            onCancel: () => {
-              throw new KilledError();
+              const title = chalk.rgb(...titleColor)(titleText);
+              return { title, value: '' + index };
+            }),
+            {
+              title: chalk.reset(
+                `${' '.repeat(10)}${chalk.dim(parentBranchName)}`
+              ),
+              disabled: true,
+              value: '0', // noop
             },
-          }
-        )
+            {
+              title: `${' '.repeat(10)}Confirm`,
+              value: '-1', // done
+            },
+          ],
+        })
       ).value
     );
     clearPromptResultLine();
@@ -349,27 +337,20 @@ async function promptNextBranchName(
   },
   context: TContext
 ): Promise<string> {
-  const { branchName } = await prompts(
-    {
-      type: 'text',
-      name: 'branchName',
-      message: `Choose a name for branch ${branchNames.length + 1}`,
-      initial: getInitialNextBranchName(branchToSplit, branchNames),
-      validate: (name) => {
-        const calculatedName = replaceUnsupportedCharacters(name, context);
-        return branchNames.includes(calculatedName) ||
-          (calculatedName !== branchToSplit &&
-            context.engine.allBranchNames.includes(calculatedName))
-          ? 'Branch name is already in use, choose a different name.'
-          : true;
-      },
+  const { branchName } = await context.prompts({
+    type: 'text',
+    name: 'branchName',
+    message: `Choose a name for branch ${branchNames.length + 1}`,
+    initial: getInitialNextBranchName(branchToSplit, branchNames),
+    validate: (name) => {
+      const calculatedName = replaceUnsupportedCharacters(name, context);
+      return branchNames.includes(calculatedName) ||
+        (calculatedName !== branchToSplit &&
+          context.engine.allBranchNames.includes(calculatedName))
+        ? 'Branch name is already in use, choose a different name.'
+        : true;
     },
-    {
-      onCancel: () => {
-        throw new KilledError();
-      },
-    }
-  );
+  });
   context.splog.newline();
   return replaceUnsupportedCharacters(branchName, context);
 }

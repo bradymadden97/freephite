@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import prompts from 'prompts';
 import { getDownstackDependencies } from '../../lib/api/get_downstack_dependencies';
 import { TContext } from '../../lib/context';
 import { KilledError, RebaseConflictError } from '../../lib/errors';
@@ -128,21 +127,14 @@ async function maybeOverwriteBranch(
   if (
     !context.interactive ||
     !(
-      await prompts(
-        {
-          type: 'confirm',
-          name: 'value',
-          message: `Overwrite ${chalk.yellow(
-            branchName
-          )} with the version from remote?`,
-          initial: false,
-        },
-        {
-          onCancel: () => {
-            throw new KilledError();
-          },
-        }
-      )
+      await context.prompts({
+        type: 'confirm',
+        name: 'value',
+        message: `Overwrite ${chalk.yellow(
+          branchName
+        )} with the version from remote?`,
+        initial: false,
+      })
     ).value
   ) {
     throw new KilledError();
@@ -176,31 +168,24 @@ async function handleSameParent(
   const fetchChoice: 'REBASE' | 'OVERWRITE' | 'ABORT' = !context.interactive
     ? 'ABORT'
     : (
-        await prompts(
-          {
-            type: 'select',
-            name: 'value',
-            message: `How would you like to handle ${chalk.yellow(
-              args.branchName
-            )}?`,
-            choices: [
-              {
-                title: 'Rebase your changes on top of the remote version',
-                value: 'REBASE',
-              },
-              {
-                title: 'Overwrite the local copy with the remote version',
-                value: 'OVERWRITE',
-              },
-              { title: 'Abort this command', value: 'ABORT' },
-            ],
-          },
-          {
-            onCancel: () => {
-              throw new KilledError();
+        await context.prompts({
+          type: 'select',
+          name: 'value',
+          message: `How would you like to handle ${chalk.yellow(
+            args.branchName
+          )}?`,
+          choices: [
+            {
+              title: 'Rebase your changes on top of the remote version',
+              value: 'REBASE',
             },
-          }
-        )
+            {
+              title: 'Overwrite the local copy with the remote version',
+              value: 'OVERWRITE',
+            },
+            { title: 'Abort this command', value: 'ABORT' },
+          ],
+        })
       ).value;
 
   switch (fetchChoice) {

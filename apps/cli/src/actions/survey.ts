@@ -1,6 +1,5 @@
 import { API_ROUTES } from '@withgraphite/graphite-cli-routes';
 import { default as t } from '@withgraphite/retype';
-import prompts from 'prompts';
 import { postSurveyResponse } from '../background_tasks/post_survey';
 import { requestWithArgs } from '../lib/api/request';
 import { TContext } from '../lib/context';
@@ -137,7 +136,7 @@ async function askSurveyQuestions(
 
     switch (question.type) {
       case 'TEXT':
-        promptResponse = await prompts(
+        promptResponse = await context.prompts(
           {
             type: 'text',
             name: 'answer',
@@ -147,7 +146,7 @@ async function askSurveyQuestions(
         );
         break;
       case 'OPTIONS':
-        promptResponse = await prompts(
+        promptResponse = await context.prompts(
           {
             type: 'select',
             name: 'answer',

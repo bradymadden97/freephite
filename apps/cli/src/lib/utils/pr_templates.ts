@@ -1,10 +1,11 @@
 import fs from 'fs-extra';
 import path from 'path';
-import prompts from 'prompts';
-import { KilledError } from '../errors';
+import { TContext } from '../context';
 import { currentGitRepoPrecondition } from '../preconditions';
 
-export async function getPRTemplate(): Promise<string | undefined> {
+export async function getPRTemplate(
+  context: TContext
+): Promise<string | undefined> {
   const templateFiles = getPRTemplateFilepaths();
   if (templateFiles.length === 0) {
     return undefined;
@@ -15,24 +16,17 @@ export async function getPRTemplate(): Promise<string | undefined> {
       templateFiles.length === 1
         ? templateFiles[0]
         : (
-            await prompts(
-              {
-                type: 'select',
-                name: 'templateFilepath',
-                message: `Body Template`,
-                choices: templateFiles.map((file) => {
-                  return {
-                    title: getRelativePathFromRepo(file),
-                    value: file,
-                  };
-                }),
-              },
-              {
-                onCancel: () => {
-                  throw new KilledError();
-                },
-              }
-            )
+            await context.prompts({
+              type: 'select',
+              name: 'templateFilepath',
+              message: `Body Template`,
+              choices: templateFiles.map((file) => {
+                return {
+                  title: getRelativePathFromRepo(file),
+                  value: file,
+                };
+              }),
+            })
           ).templateFilepath
     )
     .toString();

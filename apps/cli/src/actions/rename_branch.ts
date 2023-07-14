@@ -1,7 +1,6 @@
 import chalk from 'chalk';
-import prompts from 'prompts';
 import { TContext } from '../lib/context';
-import { ExitFailedError, KilledError } from '../lib/errors';
+import { ExitFailedError } from '../lib/errors';
 import { replaceUnsupportedCharacters } from '../lib/utils/branch_name';
 
 async function getNewBranchName(
@@ -10,26 +9,19 @@ async function getNewBranchName(
 ): Promise<string> {
   context.splog.info(`Enter new name for ${chalk.blueBright(oldBranchName)}:`);
 
-  const response = await prompts(
-    {
-      type: 'text',
-      name: 'branchName',
-      message: 'Branch Name',
-      initial: oldBranchName,
-      validate: (name) => {
-        const calculatedName = replaceUnsupportedCharacters(name, context);
-        return oldBranchName !== calculatedName &&
-          context.engine.allBranchNames.includes(calculatedName)
-          ? 'Branch name is unavailable.'
-          : true;
-      },
+  const response = await context.prompts({
+    type: 'text',
+    name: 'branchName',
+    message: 'Branch Name',
+    initial: oldBranchName,
+    validate: (name) => {
+      const calculatedName = replaceUnsupportedCharacters(name, context);
+      return oldBranchName !== calculatedName &&
+        context.engine.allBranchNames.includes(calculatedName)
+        ? 'Branch name is unavailable.'
+        : true;
     },
-    {
-      onCancel: () => {
-        throw new KilledError();
-      },
-    }
-  );
+  });
 
   return response.branchName;
 }

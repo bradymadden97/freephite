@@ -1,6 +1,5 @@
 import { API_ROUTES } from '@withgraphite/graphite-cli-routes';
 import chalk from 'chalk';
-import prompts from 'prompts';
 import { requestWithArgs } from '../../lib/api/request';
 import { TContext } from '../../lib/context';
 import { TScopeSpec } from '../../lib/engine/scope_spec';
@@ -68,7 +67,7 @@ export async function submitAction(
     .filter((branchName) => !context.engine.isTrunk(branchName));
 
   const branchNames = args.select
-    ? await selectBranches(allBranchNames)
+    ? await selectBranches(context, allBranchNames)
     : allBranchNames;
 
   context.splog.info(
@@ -190,11 +189,14 @@ export async function displayRepoMessage(context: TContext): Promise<void> {
   }
 }
 
-async function selectBranches(branchNames: string[]): Promise<string[]> {
+async function selectBranches(
+  context: TContext,
+  branchNames: string[]
+): Promise<string[]> {
   const result = [];
   for (const branchName of branchNames) {
     const selected = (
-      await prompts({
+      await context.prompts({
         name: 'value',
         initial: true,
         type: 'confirm',
@@ -229,19 +231,12 @@ async function shouldAbort(
     context.interactive &&
     args.confirm &&
     !(
-      await prompts(
-        {
-          type: 'confirm',
-          name: 'value',
-          message: 'Continue with this submit operation?',
-          initial: true,
-        },
-        {
-          onCancel: () => {
-            throw new KilledError();
-          },
-        }
-      )
+      await context.prompts({
+        type: 'confirm',
+        name: 'value',
+        message: 'Continue with this submit operation?',
+        initial: true,
+      })
     ).value
   ) {
     context.splog.info(chalk.blueBright('🛑 Aborted submit.'));

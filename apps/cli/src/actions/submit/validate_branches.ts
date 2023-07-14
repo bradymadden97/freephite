@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import prompts from 'prompts';
 import { TContext } from '../../lib/context';
 import { ExitFailedError, KilledError } from '../../lib/errors';
 import { syncPrInfo } from '../sync_pr_info';
@@ -58,32 +57,25 @@ async function validateNoMergedOrClosedBranches(
     throw new ExitFailedError(`Aborting non-interactive submit.`);
   }
 
-  const response = await prompts(
-    {
-      type: 'select',
-      name: 'empty_branches_options',
-      message: `How would you like to proceed?`,
-      choices: [
-        {
-          title: `Abort command and delete or rename ${
-            hasMultipleBranches ? 'these branches' : 'this branch'
-          }.`,
-          value: 'abort',
-        },
-        {
-          title: `Create new PRs for the branch${
-            hasMultipleBranches ? 'es' : ''
-          } and continue.`,
-          value: 'continue',
-        },
-      ],
-    },
-    {
-      onCancel: () => {
-        throw new KilledError();
+  const response = await context.prompts({
+    type: 'select',
+    name: 'empty_branches_options',
+    message: `How would you like to proceed?`,
+    choices: [
+      {
+        title: `Abort command and delete or rename ${
+          hasMultipleBranches ? 'these branches' : 'this branch'
+        }.`,
+        value: 'abort',
       },
-    }
-  );
+      {
+        title: `Create new PRs for the branch${
+          hasMultipleBranches ? 'es' : ''
+        } and continue.`,
+        value: 'continue',
+      },
+    ],
+  });
   if (response.empty_branches_options === 'abort') {
     throw new KilledError();
   }
@@ -161,30 +153,23 @@ export async function validateNoEmptyBranches(
     throw new ExitFailedError(`Aborting non-interactive submit.`);
   }
 
-  const response = await prompts(
-    {
-      type: 'select',
-      name: 'empty_branches_options',
-      message: `How would you like to proceed?`,
-      choices: [
-        {
-          title: `Abort command and keep working on ${
-            hasMultipleBranches ? 'these branches' : 'this branch'
-          }`,
-          value: 'abort',
-        },
-        {
-          title: `Continue with empty branch${hasMultipleBranches ? 'es' : ''}`,
-          value: 'continue',
-        },
-      ],
-    },
-    {
-      onCancel: () => {
-        throw new KilledError();
+  const response = await context.prompts({
+    type: 'select',
+    name: 'empty_branches_options',
+    message: `How would you like to proceed?`,
+    choices: [
+      {
+        title: `Abort command and keep working on ${
+          hasMultipleBranches ? 'these branches' : 'this branch'
+        }`,
+        value: 'abort',
       },
-    }
-  );
+      {
+        title: `Continue with empty branch${hasMultipleBranches ? 'es' : ''}`,
+        value: 'continue',
+      },
+    ],
+  });
   if (response.empty_branches_options === 'abort') {
     throw new KilledError();
   }

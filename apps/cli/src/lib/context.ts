@@ -18,6 +18,8 @@ import {
 } from './spiffy/upgrade_message_spf';
 import { TUserConfig, userConfigFactory } from './spiffy/user_config_spf';
 import { composeSplog, TSplog } from './utils/splog';
+import { NonInteractiveError } from './errors';
+import { gtPrompts, TPrompts } from './utils/prompts_helpers';
 
 export const USER_CONFIG_OVERRIDE_ENV = 'GRAPHITE_USER_CONFIG_PATH' as const;
 
@@ -28,6 +30,7 @@ export type TContextLite = {
   userConfig: TUserConfig;
   messageConfig: TMessageConfig;
   userEmail?: string;
+  prompts: TPrompts;
 };
 
 type TRepoContext = {
@@ -52,9 +55,19 @@ export function initContextLite(opts?: {
     pager: userConfig.getPager(),
   });
 
+  const interactive =
+    // Confusing, but if invoked from GTI, behave as if `--no-interactive` was passed
+    !process.env.GRAPHITE_INTERACTIVE && (opts?.interactive ?? true);
+
   return {
     splog,
-    interactive: opts?.interactive ?? true,
+    interactive,
+    prompts: async (...args: Parameters<TPrompts>) => {
+      if (!interactive) {
+        throw new NonInteractiveError();
+      }
+      return gtPrompts(...args);
+    },
     surveyConfig: surveyConfigFactory.load(),
     userConfig,
     messageConfig: messageConfigFactory.load(),
