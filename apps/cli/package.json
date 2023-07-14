@@ -7,6 +7,7 @@
   "homepage": "https://github.com/withgraphite/graphite-cli",
   "repository": "github:withgraphite/graphite-cli",
   "dependencies": {
+    "@octokit/core": "^5.0.0",
     "@withgraphite/graphite-cli-routes": "^0.31.0",
     "@withgraphite/gti-cli-shared-types": "workspace:*",
     "@withgraphite/gti-server": "workspace:*",

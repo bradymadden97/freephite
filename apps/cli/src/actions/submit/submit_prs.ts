@@ -1,11 +1,11 @@
 import { API_ROUTES } from '@withgraphite/graphite-cli-routes';
 import * as t from '@withgraphite/retype';
 import chalk from 'chalk';
-import { requestWithArgs } from '../../lib/api/request';
 import { TContext } from '../../lib/context';
-import { ExitFailedError, PreconditionsFailedError } from '../../lib/errors';
-import { cuteString } from '../../lib/utils/cute_string';
+import { ExitFailedError } from '../../lib/errors';
 import { Unpacked } from '../../lib/utils/ts_helpers';
+
+import { Octokit } from '@octokit/core';
 
 export type TPRSubmissionInfo = t.UnwrapSchemaMap<
   typeof API_ROUTES.submitPullRequests.params
@@ -78,15 +78,12 @@ function parseSubmitError(error: string): string {
   }
 }
 
-const SUCCESS_RESPONSE_CODE = 200;
-const UNAUTHORIZED_RESPONSE_CODE = 401;
-
 // This endpoint is plural for legacy reasons.
 // Leaving the function plural in case we want to revert.
 async function requestServerToSubmitPRs({
   submissionInfo,
-  mergeWhenReady,
-  trunkBranchName,
+  mergeWhenReady: __mergeWhenReady,
+  trunkBranchName: __trunkBranchName,
   context,
 }: {
   submissionInfo: TPRSubmissionInfo;
@@ -94,50 +91,67 @@ async function requestServerToSubmitPRs({
   trunkBranchName: string;
   context: TContext;
 }): Promise<TSubmittedPR[]> {
-  const response = await requestWithArgs(
-    context.userConfig,
-    API_ROUTES.submitPullRequests,
-    {
-      repoOwner: context.repoConfig.getRepoOwner(),
-      repoName: context.repoConfig.getRepoName(),
-      mergeWhenReady,
-      trunkBranchName,
-      prs: submissionInfo,
+  const octokit = new Octokit({
+    auth: process.env.GH_AUTH_TOKEN,
+  });
+
+  const owner = context.repoConfig.getRepoOwner();
+  const repo = context.repoConfig.getRepoName();
+
+  const prs = [];
+  for (const info of submissionInfo) {
+    if (info.action === 'create') {
+      prs.push(
+        await octokit.request(`POST /repos/{owner}/{repo}/pulls`, {
+          owner,
+          repo,
+          title: info.title,
+          body: info.body,
+          head: info.head,
+          base: info.base,
+          draft: info.draft,
+          headers: { 'X-GitHub-Api-Version': '2022-11-28' },
+        })
+      );
+
+      // TODO: Add a comment to PR with the tree
     }
-  );
 
-  if (
-    response._response.status === SUCCESS_RESPONSE_CODE &&
-    response._response.body
-  ) {
-    const requests: { [head: string]: TSubmittedPRRequest } = {};
-    submissionInfo.forEach((prRequest) => {
-      requests[prRequest.head] = prRequest;
-    });
+    if (info.action === 'update') {
+      prs.push(
+        await octokit.request(
+          `PATCH /repos/{owner}/{repo}/pulls/{pull_number}`,
+          {
+            owner,
+            repo,
+            pull_number: info.prNumber,
+            title: info.title,
+            body: info.body,
+            base: info.base,
+            headers: { 'X-GitHub-Api-Version': '2022-11-28' },
+          }
+        )
+      );
 
-    return response.prs.map((prResponse) => {
-      return {
-        request: requests[prResponse.head],
-        response: prResponse,
-      };
-    });
-  } else if (response._response.status === UNAUTHORIZED_RESPONSE_CODE) {
-    throw new PreconditionsFailedError(
-      `Your Graphite auth token is invalid/expired.\n\nPlease obtain a new auth token by visiting ${context.userConfig.getAppServerUrl()}/activate`
-    );
-  } else {
-    const { headers } = response._response;
-    const debugHeaders = {
-      'x-graphite-request-id': headers.get('x-graphite-request-id'),
-    };
-    const formattedHeaders = Object.entries(debugHeaders)
-      .map(([key, value]) => `  ${key}: ${value || '<empty>'}`)
-      .join('\n');
-
-    throw new ExitFailedError(
-      `Unexpected server response (${
-        response._response.status
-      }).\n\nHeaders:\n${formattedHeaders}\n\nResponse: ${cuteString(response)}`
-    );
+      // TODO: Update comment in PR with the updated tree
+    }
   }
+
+  const requests: { [head: string]: TSubmittedPRRequest } = {};
+  submissionInfo.forEach((prRequest) => {
+    requests[prRequest.head] = prRequest;
+  });
+
+  return prs.map((prResponse) => {
+    const request = requests[prResponse.data.head.ref];
+    return {
+      request,
+      response: {
+        head: prResponse.data.head.ref,
+        status: request.action === 'create' ? 'created' : 'updated',
+        prNumber: prResponse.data.number,
+        prURL: prResponse.data.html_url,
+      },
+    };
+  });
 }
