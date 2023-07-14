@@ -61,8 +61,8 @@
     "dist"
   ],
   "bin": {
-    "freephite": "dist/src/index.js",
-    "fp": "dist/src/index.js"
+    "fp": "dist/src/index.js",
+    "freephite": "dist/src/index.js"
   },
   "devDependencies": {
     "@types/chai": "^4.3.1",
