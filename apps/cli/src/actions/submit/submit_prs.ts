@@ -92,7 +92,7 @@ async function requestServerToSubmitPRs({
   context: TContext;
 }): Promise<TSubmittedPR[]> {
   const octokit = new Octokit({
-    auth: process.env.GH_AUTH_TOKEN,
+    auth: context.userConfig.getFPAuthToken(),
   });
 
   const owner = context.repoConfig.getRepoOwner();

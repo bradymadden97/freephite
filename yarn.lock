@@ -1912,8 +1912,8 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.27.1
     "@typescript-eslint/parser": ^5.27.1
     "@withgraphite/graphite-cli-routes": ^0.31.0
-    "@withgraphite/gti-cli-shared-types": "workspace:*"
-    "@withgraphite/gti-server": "workspace:*"
+    "@withgraphite/gti-cli-shared-types": ^0.3.2
+    "@withgraphite/gti-server": ^0.0.11
     "@withgraphite/retype": ^0.3.11
     "@withgraphite/retyped-routes": ^0.3.1
     chai: ^4.3.6
@@ -4766,13 +4766,46 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@withgraphite/gti-cli-shared-types@workspace:*, @withgraphite/gti-cli-shared-types@workspace:libs/gti-cli-shared-types":
+"@withgraphite/gti-cli-shared-types@0.3.2, @withgraphite/gti-cli-shared-types@^0.3.2, @withgraphite/gti-cli-shared-types@workspace:*, @withgraphite/gti-cli-shared-types@workspace:libs/gti-cli-shared-types":
   version: 0.0.0-use.local
   resolution: "@withgraphite/gti-cli-shared-types@workspace:libs/gti-cli-shared-types"
   dependencies:
     typescript: ^4.6.4
   languageName: unknown
   linkType: soft
+
+"@withgraphite/gti-client@npm:0.1.9":
+  version: 0.1.9
+  resolution: "@withgraphite/gti-client@npm:0.1.9"
+  dependencies:
+    "@primer/octicons-react": ^19.4.0
+    "@primer/primitives": ^7.11.14
+    "@styled-system/css": ^5.1.5
+    "@styled-system/theme-get": ^5.1.2
+    "@types/node": ^16.7.13
+    "@types/react": ^18.0.0
+    "@types/react-dom": ^18.0.0
+    "@vscode/codicons": ^0.0.33
+    "@vscode/webview-ui-toolkit": 1.2.2
+    "@withgraphite/gti-cli-shared-types": 0.3.2
+    "@withgraphite/gti-shared": 0.1.6
+    diff-sequences: ^29.4.3
+    fast-json-stable-stringify: ^2.1.0
+    immutable: ^4.3.0
+    lodash: ^4.17.21
+    mobx: ^6.6.2
+    mobx-react-lite: ^3.4.0
+    mobx-utils: ^6.0.6
+    react: ^18.1.0
+    react-dom: ^18.1.0
+    react-scripts: 5.0.1
+    sass: ^1.51.0
+    styled-components: ^5.3.5
+    styled-system: ^5.1.5
+    typescript: ^4.4.2
+  checksum: 84a4d33d33c39fe653f1988db2dde5d1ea252afef16f12714fdd36bcbc42615ab836babd3dfdc2590c462479ada181596f78bc4c7e7d71edc7ae0429ce8b9feb
+  languageName: node
+  linkType: hard
 
 "@withgraphite/gti-client@workspace:*, @withgraphite/gti-client@workspace:apps/gti-client":
   version: 0.0.0-use.local
@@ -4814,7 +4847,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@withgraphite/gti-server@workspace:*, @withgraphite/gti-server@workspace:apps/gti-server":
+"@withgraphite/gti-server@npm:^0.0.11":
+  version: 0.0.11
+  resolution: "@withgraphite/gti-server@npm:0.0.11"
+  dependencies:
+    "@withgraphite/gti-client": 0.1.9
+    execa: 5.1.1
+    fb-watchman: ^2.0.2
+    ws: ^8.6.0
+  checksum: 42a5b06500d7a22147c15bb63f7b4622d95aadd05c0433155fbcee9cd9d7dfc19b41ee3424a09b0c00780d95007949d4da6059a308d7350eee332f67178dcef4
+  languageName: node
+  linkType: hard
+
+"@withgraphite/gti-server@workspace:apps/gti-server":
   version: 0.0.0-use.local
   resolution: "@withgraphite/gti-server@workspace:apps/gti-server"
   dependencies:
@@ -4835,6 +4880,17 @@ __metadata:
     ws: ^8.6.0
   languageName: unknown
   linkType: soft
+
+"@withgraphite/gti-shared@npm:0.1.6":
+  version: 0.1.6
+  resolution: "@withgraphite/gti-shared@npm:0.1.6"
+  dependencies:
+    "@withgraphite/gti-cli-shared-types": 0.3.2
+    immutable: ^4.3.0
+    node-abort-controller: ^3.1.1
+  checksum: ab99a1dd5f30bc2fad6cbdaa64a12a7ec3f3e3740dbfa6a51bac6c752a5a8771b4b4ce4b4cfeb5cd148cf1a5af4332577ceafef7a530e177ac11acaebe420e4e
+  languageName: node
+  linkType: hard
 
 "@withgraphite/gti-shared@workspace:*, @withgraphite/gti-shared@workspace:libs/gti-shared":
   version: 0.0.0-use.local

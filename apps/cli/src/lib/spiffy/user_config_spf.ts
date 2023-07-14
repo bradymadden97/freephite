@@ -11,6 +11,7 @@ const schema = t.shape({
     t.unionMany([t.literal('_'), t.literal('-'), t.literal('')])
   ),
   authToken: t.optional(t.string),
+  fpAuthToken: t.optional(t.string),
   tips: t.optional(t.boolean),
   editor: t.optional(t.string),
   pager: t.optional(t.string),
@@ -31,6 +32,7 @@ const schema = t.shape({
         name: t.string,
         hostPrefix: t.string,
         authToken: t.optional(t.string),
+        fpAuthToken: t.optional(t.string),
       })
     )
   ),
@@ -84,6 +86,7 @@ export const userConfigFactory = spiffy({
           name: 'default',
           hostPrefix: '',
           authToken: data.authToken,
+          fpAuthToken: data.fpAuthToken,
         };
       }
     };
@@ -108,6 +111,10 @@ export const userConfigFactory = spiffy({
 
     const getAuthToken = (): string | undefined => {
       return getDefaultProfile().authToken;
+    };
+
+    const getFPAuthToken = (): string | undefined => {
+      return getDefaultProfile().fpAuthToken;
     };
 
     const getEditor = () => {
@@ -142,6 +149,7 @@ export const userConfigFactory = spiffy({
       getApiServerUrl,
       getAppServerUrl,
       getAuthToken,
+      getFPAuthToken,
       getPager,
       execEditor: (editFilePath: string) => {
         const command = `${getEditor()} ${editFilePath}`;
