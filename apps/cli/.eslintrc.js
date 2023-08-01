@@ -6,7 +6,7 @@ module.exports = {
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint", "import"],
   "rules": {
-    "no-console": "error",
+    // "no-console": "error",
     "@typescript-eslint/no-unused-vars": [
       "error",
       { "argsIgnorePattern": "^_" }
