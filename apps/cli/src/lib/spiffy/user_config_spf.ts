@@ -1,5 +1,6 @@
 import * as t from '@withgraphite/retype';
-import { execSync } from 'child_process';
+import { exec, execSync } from 'child_process';
+import { promisify } from 'util';
 import { getGitEditor, getGitPager } from '../git/git_editor';
 import { CommandFailedError } from '../git/runner';
 import { spiffy } from './spiffy';
@@ -115,15 +116,20 @@ export const userConfigFactory = spiffy({
 
     const getFPAuthToken = async (): Promise<string | undefined> => {
       // 1. Check if fpAuthToken is stored locally
-      const local = getDefaultProfile().fpAuthToken;
-      if (local) {
-        return local;
-      }
+      // const local = getDefaultProfile().fpAuthToken;
+      // if (local) {
+      //   return local;
+      // }
 
       // 2. Check if the environment provides an ASKPASS script
       const askPass = process.env.FREEPHITE_ASKPASS;
+
+      // eslint-disable-next-line no-console
+      console.log('HAS ASKPASS', askPass);
+
       if (askPass) {
-        return await exec(askPass).stdout.trim();
+        const response = await promisify(exec)(askPass);
+        return response.stdout.trim();
       }
 
       // 3. Otherwise, return undefined
