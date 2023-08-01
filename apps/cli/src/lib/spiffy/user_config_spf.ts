@@ -116,18 +116,14 @@ export const userConfigFactory = spiffy({
 
     const getFPAuthToken = async (): Promise<string | undefined> => {
       // 1. Check if fpAuthToken is stored locally
-      // const local = getDefaultProfile().fpAuthToken;
-      // if (local) {
-      //   return local;
-      // }
+      const local = getDefaultProfile().fpAuthToken;
+      if (local) {
+        return local;
+      }
 
       console.log(process.env);
       // 2. Check if the environment provides an ASKPASS script
       const askPass = process.env.FREEPHITE_ASKPASS;
-
-      // eslint-disable-next-line no-console
-      console.log('HAS ASKPASS', askPass);
-
       if (askPass) {
         const response = await promisify(exec)(askPass);
         return response.stdout.trim();
