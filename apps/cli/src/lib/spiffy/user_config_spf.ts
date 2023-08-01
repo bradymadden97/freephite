@@ -121,7 +121,6 @@ export const userConfigFactory = spiffy({
         return local;
       }
 
-      console.log(process.env);
       // 2. Check if the environment provides an ASKPASS script
       const askPass = process.env.FREEPHITE_ASKPASS;
       if (askPass) {
