@@ -144,7 +144,7 @@ export async function submitAction(
     );
   }
 
-  const auth = context.userConfig.getFPAuthToken();
+  const auth = await context.userConfig.getFPAuthToken();
   if (!auth) {
     throw new Error(
       'No freephite auth token found. Run `fp auth-fp -t <YOUR_GITHUB_TOKEN>` then try again.'

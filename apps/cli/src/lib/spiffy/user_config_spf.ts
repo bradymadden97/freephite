@@ -113,8 +113,21 @@ export const userConfigFactory = spiffy({
       return getDefaultProfile().authToken;
     };
 
-    const getFPAuthToken = (): string | undefined => {
-      return getDefaultProfile().fpAuthToken;
+    const getFPAuthToken = async (): Promise<string | undefined> => {
+      // 1. Check if fpAuthToken is stored locally
+      const local = getDefaultProfile().fpAuthToken;
+      if (local) {
+        return local;
+      }
+
+      // 2. Check if the environment provides an ASKPASS script
+      const askPass = process.env.FREEPHITE_ASKPASS;
+      if (askPass) {
+        return await exec(askPass).stdout.trim();
+      }
+
+      // 3. Otherwise, return undefined
+      return undefined;
     };
 
     const getEditor = () => {

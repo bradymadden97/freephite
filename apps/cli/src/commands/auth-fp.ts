@@ -27,7 +27,7 @@ export const handler = async (argv: argsT): Promise<void> => {
       return;
     }
 
-    const existing = context.userConfig.getFPAuthToken();
+    const existing = await context.userConfig.getFPAuthToken();
     if (existing) {
       context.splog.info(`Existing FP auth token ${existing}`);
     } else {
