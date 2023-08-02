@@ -154,6 +154,7 @@ export async function submitAction(
 
   //
   //
+
   const octokit = new Octokit({ auth });
 
   console.log('Branches', branchNames);
@@ -170,7 +171,7 @@ export async function submitAction(
     }
   }
 
-  const comment = StackCommentBody.generate(context.engine.trunk, prs);
+  const comment = StackCommentBody.generate(context, prs);
   const owner = context.repoConfig.getRepoOwner();
   const repo = context.repoConfig.getRepoName();
 
