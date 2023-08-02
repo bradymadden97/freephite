@@ -155,6 +155,8 @@ export async function submitAction(
   //
   const octokit = new Octokit({ auth });
 
+  console.log('Branches', branchNames);
+
   const prs: Array<PR> = [];
   for (const branchName of branchNames) {
     const info = context.engine.getPrInfo(branchName);
