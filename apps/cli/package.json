@@ -1,6 +1,6 @@
 {
   "name": "@bradymadden97/freephite-cli",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "license": "None",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",

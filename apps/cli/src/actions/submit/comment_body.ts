@@ -1,21 +1,32 @@
+import { TContext } from '../../lib/context';
 import { TBranchPRInfo } from '../../lib/engine/metadata_ref';
 
 export interface PR extends Required<Pick<TBranchPRInfo, 'number' | 'base'>> {
   ref: string;
 }
-type Tree = Record<PR['ref'] | 'main', Array<PR>>;
+
+type Ref = PR['ref'];
+type Trunk = TContext['engine']['trunk'];
+type Tree = Record<Ref | Trunk, Array<PR>>;
+type Reverse = Record<Ref, Ref | Trunk>;
 
 abstract class StackCommentBodyBase {
   protected tree: Tree;
+  protected reverse: Reverse;
   protected comment: string;
 
-  protected constructor(protected trunk: string, prs: Array<PR>) {
-    this.tree = { [trunk]: [] };
+  protected constructor(protected context: TContext, prs: Array<PR>) {
+    this.tree = { [context.engine.trunk]: [] };
+    this.reverse = {};
 
+    // Populate tree with PR info
     for (const pr of prs) {
-      const deps = this.tree[pr.base];
-      this.tree[pr.base] = deps ? [...deps, pr] : [pr];
-      this.tree[pr.ref] = [];
+      this.addBranchToTree(pr);
+    }
+
+    // Fill the remaining path to trunk if necessary
+    for (const base of Object.keys(this.tree)) {
+      this.findRouteToTrunk(base);
     }
 
     this.comment = 'Current dependencies on/for this PR:\n\n';
@@ -27,16 +38,44 @@ abstract class StackCommentBodyBase {
     return `**PR #${pr.number}**`;
   }
 
+  private addBranchToTree(pr: PR) {
+    const deps = this.tree[pr.base];
+    this.tree[pr.base] = deps ? [...deps, pr] : [pr];
+    this.tree[pr.ref] = this.tree[pr.ref] ?? [];
+    this.reverse[pr.ref] = pr.base;
+  }
+
+  private findRouteToTrunk(base: string): void {
+    if (base === this.context.engine.trunk) {
+      return;
+    }
+
+    if (!(base in this.reverse)) {
+      const pr = this.context.engine.getPrInfo(base);
+      if (!pr?.number || !pr?.base) {
+        return;
+      }
+
+      this.addBranchToTree({
+        base: pr.base,
+        number: pr.number,
+        ref: base,
+      });
+    }
+
+    return this.findRouteToTrunk(this.reverse[base]);
+  }
+
   private buildTreeComment(pr: PR | undefined, level = 0): string {
+    const trunk = this.context.engine.trunk;
     let line = ' '.repeat(level * 2) + '* ';
     if (pr === undefined) {
-      line += `${this.trunk}:\n`;
+      line += `${trunk}:\n`;
     } else {
       line += this.buildPRString(pr) + '\n';
     }
 
-    const children =
-      pr === undefined ? this.tree[this.trunk] : this.tree[pr.ref];
+    const children = pr === undefined ? this.tree[trunk] : this.tree[pr.ref];
 
     return line.concat(
       children.map((c) => this.buildTreeComment(c, level + 1)).join('')
@@ -47,13 +86,13 @@ abstract class StackCommentBodyBase {
 /**
  * External API for generating a comment from a PR stack
  *
- * const body = StackCommentBody.generate(prs: Array<PR>)
+ * const body = StackCommentBody.generate(context: TContext, prs: Array<PR>)
  * const withPointer = body.forPR(pr: PR);
  *
  */
 export class StackCommentBody extends StackCommentBodyBase {
-  public static generate(trunk: string, prs: Array<PR>): StackCommentBody {
-    return new this(trunk, prs);
+  public static generate(context: TContext, prs: Array<PR>): StackCommentBody {
+    return new this(context, prs);
   }
 
   public forPR(pr: PR): string {

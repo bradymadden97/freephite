@@ -150,13 +150,8 @@ export async function submitAction(
       'No freephite auth token found. Run `fp auth-fp -t <YOUR_GITHUB_TOKEN>` then try again.'
     );
   }
-  //
 
-  //
-  //
   const octokit = new Octokit({ auth });
-
-  console.log('Branches', branchNames);
 
   const prs: Array<PR> = [];
   for (const branchName of branchNames) {
@@ -170,7 +165,7 @@ export async function submitAction(
     }
   }
 
-  const comment = StackCommentBody.generate(context.engine.trunk, prs);
+  const comment = StackCommentBody.generate(context, prs);
   const owner = context.repoConfig.getRepoOwner();
   const repo = context.repoConfig.getRepoName();
 
