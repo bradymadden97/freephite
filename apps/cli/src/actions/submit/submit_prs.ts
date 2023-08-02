@@ -76,6 +76,7 @@ function parseSubmitError(error: string): string {
     return error;
   }
 }
+//
 
 // This endpoint is plural for legacy reasons.
 // Leaving the function plural in case we want to revert.
