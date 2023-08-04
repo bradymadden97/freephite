@@ -74,7 +74,7 @@ export async function submitAction(
 
   context.splog.info(
     chalk.blueBright(
-      `🥞 Validating that this Graphite stack is ready to submit...`
+      `🥞 Validating that this Freephite stack is ready to submit...`
     )
   );
   context.splog.newline();
@@ -127,7 +127,7 @@ export async function submitAction(
             `Force-with-lease push of ${chalk.yellow(
               submissionInfo.head
             )} failed due to external changes to the remote branch.`,
-            'If you are collaborating on this stack, try `gt downstack get` to pull in changes.',
+            'If you are collaborating on this stack, try `fp downstack get` to pull in changes.',
             'Alternatively, use the `--force` option of this command to bypass the stale info warning.',
           ].join('\n')
         );

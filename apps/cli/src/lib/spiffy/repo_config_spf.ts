@@ -49,7 +49,7 @@ export const repoConfigFactory = spiffy({
         }
 
         throw new ExitFailedError(
-          "Could not determine the host of this repo (e.g. 'github.com' in the repo 'https://github.com/withgraphite/graphite-cli'). Please run `gt repo owner --set <owner>` to manually set the repo owner."
+          "Could not determine the host of this repo (e.g. 'github.com' in the repo 'https://github.com/withgraphite/graphite-cli'). Please run `fp repo owner --set <owner>` to manually set the repo owner."
         );
       },
 
@@ -65,7 +65,7 @@ export const repoConfigFactory = spiffy({
         }
 
         throw new ExitFailedError(
-          "Could not determine the owner of this repo (e.g. 'withgraphite' in the repo 'withgraphite/graphite-cli'). Please run `gt repo owner --set <owner>` to manually set the repo owner."
+          "Could not determine the owner of this repo (e.g. 'withgraphite' in the repo 'withgraphite/graphite-cli'). Please run `fp repo owner --set <owner>` to manually set the repo owner."
         );
       },
 
@@ -80,7 +80,7 @@ export const repoConfigFactory = spiffy({
         }
 
         throw new ExitFailedError(
-          "Could not determine the name of this repo (e.g. 'graphite-cli' in the repo 'withgraphite/graphite-cli'). Please run `gt repo name --set <owner>` to manually set the repo name."
+          "Could not determine the name of this repo (e.g. 'graphite-cli' in the repo 'withgraphite/graphite-cli'). Please run `fp repo name --set <owner>` to manually set the repo name."
         );
       },
     } as const;
@@ -102,7 +102,7 @@ function inferRepoGitHubInfo(remote: string): {
   });
 
   const inferError = new ExitFailedError(
-    `Failed to infer the owner and name of this repo from remote ${remote} "${url}". Please run \`gt repo owner --set <owner>\` and \`gt repo name --set <name>\` to manually set the repo owner/name. (e.g. in the repo 'withgraphite/graphite-cli', 'withgraphite' is the repo owner and 'graphite-cli' is the repo name)`
+    `Failed to infer the owner and name of this repo from remote ${remote} "${url}". Please run \`fp repo owner --set <owner>\` and \`fp repo name --set <name>\` to manually set the repo owner/name. (e.g. in the repo 'withgraphite/graphite-cli', 'withgraphite' is the repo owner and 'graphite-cli' is the repo name)`
   );
   if (!url) {
     throw inferError;

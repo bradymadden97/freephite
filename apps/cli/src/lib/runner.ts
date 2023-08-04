@@ -151,7 +151,7 @@ async function graphiteHelper(
       context.engine.rebaseInProgress()
     ) {
       throw new DetachedError(
-        `Did you mean to run ${chalk.cyan(`gt continue`)}?`
+        `Did you mean to run ${chalk.cyan(`fp continue`)}?`
       );
     }
     throw err;

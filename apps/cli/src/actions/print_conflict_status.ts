@@ -33,14 +33,14 @@ export function printConflictStatus(
   );
   context.splog.info(`(1) resolve the listed merge conflicts`);
   context.splog.info(
-    `(2) mark them as resolved with ${chalk.cyan(`gt add .`)}`
+    `(2) mark them as resolved with ${chalk.cyan(`fp add .`)}`
   );
   context.splog.info(
     `(3) run ${chalk.cyan(
-      `gt continue`
+      `fp continue`
     )} to continue executing your previous Graphite command`
   );
   context.splog.info(
-    "It's safe to cancel the ongoing rebase with `gt rebase --abort`."
+    "It's safe to cancel the ongoing rebase with `fp rebase --abort`."
   );
 }
