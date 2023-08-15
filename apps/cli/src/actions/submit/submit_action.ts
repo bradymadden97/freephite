@@ -169,6 +169,8 @@ export async function submitAction(
   const owner = context.repoConfig.getRepoOwner();
   const repo = context.repoConfig.getRepoName();
 
+  // Comment
+
   for (const pr of prs) {
     const existing = await octokit.request(
       'GET /repos/{owner}/{repo}/issues/{issue_number}/comments',
