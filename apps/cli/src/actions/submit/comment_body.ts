@@ -7,7 +7,7 @@ export interface PR extends Required<Pick<TBranchPRInfo, 'number' | 'base'>> {
 
 type Ref = PR['ref'];
 type Trunk = TContext['engine']['trunk'];
-type Tree = Record<Ref | Trunk, Array<PR>>;
+type Tree = Record<Ref | Trunk, Array<PR | Pick<PR, 'base' | 'ref'>>>;
 type Reverse = Record<Ref, Ref | Trunk>;
 
 abstract class StackCommentBodyBase {
@@ -38,11 +38,19 @@ abstract class StackCommentBodyBase {
     return `**PR #${pr.number}**`;
   }
 
-  private addBranchToTree(pr: PR) {
-    const deps = this.tree[pr.base];
-    this.tree[pr.base] = deps ? [...deps, pr] : [pr];
-    this.tree[pr.ref] = this.tree[pr.ref] ?? [];
-    this.reverse[pr.ref] = pr.base;
+  protected buildBranchRefString(ref: Pick<PR, 'base' | 'ref'>): string {
+    const owner = this.context.repoConfig.getRepoOwner();
+    const repo = this.context.repoConfig.getRepoName();
+    return `Branch _${ref.ref}_ - [Create Pull Request](https://github.com/${owner}/${repo}/compare/${ref.base}...${ref.ref})`;
+  }
+
+  private addBranchToTree(branch: PR | Pick<PR, 'base' | 'ref'>) {
+    const deps = this.tree[branch.base];
+    // if (!deps || !deps.some((d) => d.ref === branch.ref)) {
+    this.tree[branch.base] = deps ? [...deps, branch] : [branch];
+    // }
+    this.tree[branch.ref] = this.tree[branch.ref] ?? [];
+    this.reverse[branch.ref] = branch.base;
   }
 
   private findRouteToTrunk(base: string): void {
@@ -50,29 +58,44 @@ abstract class StackCommentBodyBase {
       return;
     }
 
-    if (!(base in this.reverse)) {
-      const pr = this.context.engine.getPrInfo(base);
-      if (!pr?.number || !pr?.base) {
-        return;
-      }
+    if (base in this.reverse) {
+      return this.findRouteToTrunk(this.reverse[base]);
+    }
 
+    const pr = this.context.engine.getPrInfo(base);
+
+    // Add PR to tree and continue iterating to trunk
+    if (pr && pr.base && pr.number) {
       this.addBranchToTree({
         base: pr.base,
         number: pr.number,
         ref: base,
       });
+
+      return this.findRouteToTrunk(this.reverse[base]);
     }
 
-    return this.findRouteToTrunk(this.reverse[base]);
+    // If we don't have a PR, look up general branch info
+    const parent = this.context.engine.getParent(base);
+    if (parent) {
+      this.addBranchToTree({ base: parent, ref: base });
+
+      return this.findRouteToTrunk(this.reverse[base]);
+    }
   }
 
-  private buildTreeComment(pr: PR | undefined, level = 0): string {
+  private buildTreeComment(
+    pr: PR | Pick<PR, 'base' | 'ref'> | undefined,
+    level = 0
+  ): string {
     const trunk = this.context.engine.trunk;
     let line = ' '.repeat(level * 2) + '* ';
     if (pr === undefined) {
       line += `${trunk}:\n`;
-    } else {
+    } else if ('number' in pr) {
       line += this.buildPRString(pr) + '\n';
+    } else {
+      line += this.buildBranchRefString(pr) + '\n';
     }
 
     const children = pr === undefined ? this.tree[trunk] : this.tree[pr.ref];
