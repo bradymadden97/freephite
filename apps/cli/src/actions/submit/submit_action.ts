@@ -168,7 +168,8 @@ export async function submitAction(
   const comment = StackCommentBody.generate(context, prs);
   const owner = context.repoConfig.getRepoOwner();
   const repo = context.repoConfig.getRepoName();
-  // 1
+
+  console.log(prs);
 
   for (const pr of prs) {
     const existing = await octokit.request(
