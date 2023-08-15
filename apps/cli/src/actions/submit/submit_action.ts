@@ -170,7 +170,7 @@ export async function submitAction(
   const repo = context.repoConfig.getRepoName();
 
   // Comment
-  //
+  // Another comment
 
   for (const pr of prs) {
     const existing = await octokit.request(
