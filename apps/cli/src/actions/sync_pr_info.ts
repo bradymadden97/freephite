@@ -11,6 +11,9 @@ export async function syncPrInfo(
     return [];
   }
 
+  // eslint-disable-next-line no-console
+  console.log('syncPrInfo call', branchNames, context);
+
   const upsertInfo = await getPrInfoForBranches(
     branchNames.map((branchName) => ({
       branchName,

@@ -26,6 +26,9 @@ export async function syncAction(
 
   const branchesToRestack: string[] = [];
 
+  // eslint-disable-next-line no-console
+  console.log("IT'S ENTERING HERE!", opts, context);
+
   await syncPrInfo(context.engine.allBranchNames, context);
 
   if (opts.delete) {

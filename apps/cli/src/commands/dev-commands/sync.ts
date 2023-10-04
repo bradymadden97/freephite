@@ -12,6 +12,8 @@ export const builder = args;
 
 type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 export const handler = async (argv: argsT): Promise<void> => {
+  // eslint-disable-next-line no-console
+  console.log("IT'S ENTERING HERE! fp dev sync");
   return graphite(argv, canonical, async (context) => {
     context.splog.info(cuteString(getPrInfoToUpsert(context)));
   });

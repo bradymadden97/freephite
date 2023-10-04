@@ -1,12 +1,8 @@
-import { API_ROUTES } from '@withgraphite/graphite-cli-routes';
 import chalk from 'chalk';
-import { requestWithArgs } from '../../lib/api/request';
 import { TContext } from '../../lib/context';
 import { TScopeSpec } from '../../lib/engine/scope_spec';
 import { ExitFailedError, KilledError } from '../../lib/errors';
 import { CommandFailedError } from '../../lib/git/runner';
-import { cliAuthPrecondition } from '../../lib/preconditions';
-import { getSurvey, showSurvey } from '../survey';
 import { getPRInfoForBranches } from './prepare_branches';
 import { submitPullRequest } from './submit_prs';
 import { validateBranchesToSubmit } from './validate_branches';
@@ -215,56 +211,8 @@ export async function submitAction(
     }
   }
 
-  await displayRepoMessage(context);
-
   if (!context.interactive) {
     return;
-  }
-
-  const survey = await getSurvey(context);
-  if (survey) {
-    await showSurvey(survey, context);
-  }
-}
-
-const IGNORE_MESSAGES = ['Upgrade your plan to keep stacking'];
-
-export async function displayRepoMessage(context: TContext): Promise<void> {
-  try {
-    cliAuthPrecondition(context);
-    const response = await requestWithArgs(
-      context.userConfig,
-      API_ROUTES.getRepoMessage,
-      {},
-      {
-        org: context.repoConfig.getRepoOwner(),
-        repo: context.repoConfig.getRepoName(),
-      }
-    );
-
-    const { message } = response;
-    if (response._response.status !== 200 || !message) {
-      return;
-    }
-
-    // Don't show the ignored messages to the user
-    if (IGNORE_MESSAGES.find((m) => message.text.includes(m))) {
-      return;
-    }
-
-    switch (message.status) {
-      case 'info':
-        context.splog.info(message.text);
-        break;
-      case 'warning':
-        context.splog.warn(message.text);
-        break;
-      case 'error':
-        context.splog.error(message.text);
-        break;
-    }
-  } catch (e) {
-    // silence any error - this shouldn't crash any part of the CLI
   }
 }
 

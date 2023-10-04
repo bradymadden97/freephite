@@ -40,6 +40,8 @@ export async function getPrInfoToUpsert({
     repoName: repoConfig.getRepoName(),
     repoOwner: repoConfig.getRepoOwner(),
   };
+  // eslint-disable-next-line no-console
+  console.log('getPrInfoToUpsert', { authToken, repoName, repoOwner });
   if (!authToken || !repoName || !repoOwner) {
     return [];
   }
@@ -49,6 +51,8 @@ export async function getPrInfoToUpsert({
     branchName,
     prNumber: readMetadataRef(branchName)?.prInfo?.number,
   }));
+  // eslint-disable-next-line no-console
+  console.log('getPrInfoToUpsert', 'calling getPrInfoForBranches');
   return await getPrInfoForBranches(
     branchNamesWithExistingPrNumbers,
     {
