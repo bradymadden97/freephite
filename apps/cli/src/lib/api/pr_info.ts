@@ -1,8 +1,28 @@
-import { API_ROUTES } from '@withgraphite/graphite-cli-routes';
-import t from '@withgraphite/retype';
+import * as t from '@withgraphite/retype';
 import { TUserConfig } from '../spiffy/user_config_spf';
 import { TRepoParams } from './common_params';
-import { requestWithArgs } from './request';
+
+const pullRequestInfoResponse = {
+  prs: t.array(
+    t.shape({
+      prNumber: t.number,
+      title: t.string,
+      body: t.string,
+      state: t.literals(['OPEN', 'CLOSED', 'MERGED'] as const),
+      reviewDecision: t.literals([
+        'CHANGES_REQUESTED',
+        'APPROVED',
+        'REVIEW_REQUIRED',
+        null,
+        undefined,
+      ] as const),
+      headRefName: t.string,
+      baseRefName: t.string,
+      url: t.string,
+      isDraft: t.boolean,
+    })
+  ),
+};
 
 type TBranchNameWithPrNumber = {
   branchName: string;
@@ -10,54 +30,15 @@ type TBranchNameWithPrNumber = {
 };
 
 export type TPRInfoToUpsert = t.UnwrapSchemaMap<
-  typeof API_ROUTES.pullRequestInfo.response
+  typeof pullRequestInfoResponse
 >['prs'];
 
 export async function getPrInfoForBranches(
-  branchNamesWithExistingPrInfo: TBranchNameWithPrNumber[],
-  params: TRepoParams,
-  userConfig: TUserConfig
+  _branchNamesWithExistingPrInfo: TBranchNameWithPrNumber[],
+  _params: TRepoParams,
+  _userConfig: TUserConfig
 ): Promise<TPRInfoToUpsert> {
-  // We sync branches without existing PR info by name.  For branches
-  // that are already associated with a PR, we only sync if both the
-  // the associated PR (keyed by number) if the name matches the headRef.
-
-  const branchesWithoutPrInfo = new Set<string>();
-  const existingPrInfo = new Map<number, string>();
-
-  branchNamesWithExistingPrInfo.forEach((branch) => {
-    if (branch?.prNumber === undefined) {
-      branchesWithoutPrInfo.add(branch.branchName);
-    } else {
-      existingPrInfo.set(branch.prNumber, branch.branchName);
-    }
-  });
-
-  const response = await requestWithArgs(
-    userConfig,
-    API_ROUTES.pullRequestInfo,
-    {
-      ...params,
-      prNumbers: [...existingPrInfo.keys()],
-      prHeadRefNames: [...branchesWithoutPrInfo],
-    }
-  );
-
-  if (response._response.status !== 200) {
-    return [];
-  }
-
-  return response.prs.filter((pr) => {
-    const branchNameIfAssociated = existingPrInfo.get(pr.prNumber);
-
-    const shouldAssociatePrWithBranch =
-      !branchNameIfAssociated &&
-      pr.state === 'OPEN' &&
-      branchesWithoutPrInfo.has(pr.headRefName);
-
-    const shouldUpdateExistingBranch =
-      branchNameIfAssociated === pr.headRefName;
-
-    return shouldAssociatePrWithBranch || shouldUpdateExistingBranch;
-  });
+  // We unfortunately don't have a good way to get PR infos (not until we move it to GH)
+  // This is just to keep things without break
+  return Promise.resolve([]);
 }

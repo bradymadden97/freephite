@@ -1,4 +1,3 @@
-import { API_ROUTES } from '@withgraphite/graphite-cli-routes';
 import * as t from '@withgraphite/retype';
 import chalk from 'chalk';
 import { TContext } from '../../lib/context';
@@ -7,14 +6,66 @@ import { Unpacked } from '../../lib/utils/ts_helpers';
 
 import { Octokit } from '@octokit/core';
 
+const submitPullRequestsParams = {
+  authToken: t.optional(t.string),
+  repoOwner: t.string,
+  repoName: t.string,
+  trunkBranchName: t.optional(t.string),
+  mergeWhenReady: t.optional(t.boolean),
+  prs: t.array(
+    t.unionMany([
+      t.shape({
+        action: t.literals(['create'] as const),
+        head: t.string,
+        headSha: t.optional(t.string),
+        base: t.string,
+        baseSha: t.optional(t.string),
+        title: t.string,
+        body: t.optional(t.string),
+        draft: t.optional(t.boolean),
+        reviewers: t.optional(t.array(t.string)),
+      }),
+      t.shape({
+        action: t.literals(['update'] as const),
+        head: t.string,
+        headSha: t.optional(t.string),
+        base: t.string,
+        baseSha: t.optional(t.string),
+        title: t.optional(t.string),
+        body: t.optional(t.string),
+        prNumber: t.number,
+        draft: t.optional(t.boolean),
+      }),
+    ])
+  ),
+};
+
+const submitPullRequestResponse = {
+  prs: t.array(
+    t.unionMany([
+      t.shape({
+        head: t.string,
+        prNumber: t.number,
+        prURL: t.string,
+        status: t.literals(['updated', 'created'] as const),
+      }),
+      t.shape({
+        head: t.string,
+        error: t.string,
+        status: t.literals(['error'] as const),
+      }),
+    ])
+  ),
+};
+
 export type TPRSubmissionInfo = t.UnwrapSchemaMap<
-  typeof API_ROUTES.submitPullRequests.params
+  typeof submitPullRequestsParams
 >['prs'];
 
 type TSubmittedPRRequest = Unpacked<TPRSubmissionInfo>;
 
 type TSubmittedPRResponse = Unpacked<
-  t.UnwrapSchemaMap<typeof API_ROUTES.submitPullRequests.response>['prs']
+  t.UnwrapSchemaMap<typeof submitPullRequestResponse>['prs']
 >;
 
 type TSubmittedPR = {

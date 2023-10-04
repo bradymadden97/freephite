@@ -40,8 +40,6 @@ export async function getPrInfoToUpsert({
     repoName: repoConfig.getRepoName(),
     repoOwner: repoConfig.getRepoOwner(),
   };
-  // eslint-disable-next-line no-console
-  console.log('getPrInfoToUpsert', { authToken, repoName, repoOwner });
   if (!authToken || !repoName || !repoOwner) {
     return [];
   }
@@ -51,8 +49,6 @@ export async function getPrInfoToUpsert({
     branchName,
     prNumber: readMetadataRef(branchName)?.prInfo?.number,
   }));
-  // eslint-disable-next-line no-console
-  console.log('getPrInfoToUpsert', 'calling getPrInfoForBranches');
   return await getPrInfoForBranches(
     branchNamesWithExistingPrNumbers,
     {
@@ -65,16 +61,17 @@ export async function getPrInfoToUpsert({
 }
 
 async function refreshPRInfo(): Promise<void> {
+  const loaded = prInfoConfigFactory.load();
+  // eslint-disable-next-line no-console
+  console.log('refreshPRInfo:', loaded);
   try {
     const prInfoToUpsert = await getPrInfoToUpsert({
       userConfig: userConfigFactory.load(),
       repoConfig: repoConfigFactory.load(),
     });
-    prInfoConfigFactory
-      .load()
-      .update((data) => (data.prInfoToUpsert = prInfoToUpsert));
+    loaded.update((data) => (data.prInfoToUpsert = prInfoToUpsert));
   } catch (err) {
-    prInfoConfigFactory.load().delete();
+    loaded.delete();
   }
 }
 
