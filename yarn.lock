@@ -1911,7 +1911,6 @@ __metadata:
     "@types/yargs": ^17.0.10
     "@typescript-eslint/eslint-plugin": ^5.27.1
     "@typescript-eslint/parser": ^5.27.1
-    "@withgraphite/graphite-cli-routes": ^0.31.0
     "@withgraphite/gti-cli-shared-types": ^0.3.2
     "@withgraphite/gti-server": ^0.0.11
     "@withgraphite/retype": ^0.3.11
@@ -4756,16 +4755,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@withgraphite/graphite-cli-routes@npm:^0.31.0":
-  version: 0.31.0
-  resolution: "@withgraphite/graphite-cli-routes@npm:0.31.0"
-  dependencies:
-    "@withgraphite/retype": ^0.3.15
-    "@withgraphite/retyped-routes": ^0.3.7
-  checksum: d8d83c2066a795a371d2235b9305b81cb1a71f66b76582f66512c9a5993aa35058d59ad2c5d06f3417e6da5e7be381306c20cd51b4f0f79a1a989789f652d36d
-  languageName: node
-  linkType: hard
-
 "@withgraphite/gti-cli-shared-types@^0.3.2, @withgraphite/gti-cli-shared-types@workspace:*, @withgraphite/gti-cli-shared-types@workspace:libs/gti-cli-shared-types":
   version: 0.0.0-use.local
   resolution: "@withgraphite/gti-cli-shared-types@workspace:libs/gti-cli-shared-types"
@@ -4883,13 +4872,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@withgraphite/retype@npm:^0.3.15":
-  version: 0.3.15
-  resolution: "@withgraphite/retype@npm:0.3.15"
-  checksum: 439c0c69c95ed382ae54273c31e653e913e17d4408d04c5dfe509b2d1de4283177bbd738ab1ba907746ddfa7fb1441c7cc2e87a4500d25b005e42a50e4b6ebdd
-  languageName: node
-  linkType: hard
-
 "@withgraphite/retyped-routes@npm:^0.3.1":
   version: 0.3.1
   resolution: "@withgraphite/retyped-routes@npm:0.3.1"
@@ -4900,17 +4882,6 @@ __metadata:
     isomorphic-fetch: ^3.0.0
     path-to-regexp: ^6.1.0
   checksum: 9ae24ab1f4752718c83d8c568abc919e929586f8fe2810b8be1db1d34c73ef0ec797b6e955b13f4375292ca0e7b4cba5466679612eb7f48b725d357e677e9e62
-  languageName: node
-  linkType: hard
-
-"@withgraphite/retyped-routes@npm:^0.3.7":
-  version: 0.3.7
-  resolution: "@withgraphite/retyped-routes@npm:0.3.7"
-  dependencies:
-    "@withgraphite/retype": ^0.3.15
-    isomorphic-fetch: ^3.0.0
-    path-to-regexp: ^6.1.0
-  checksum: f73844e11ea18f4a70357aff04ff45a97c407a6d01ed51ccb1221009b888ef0a1b5c35f9961df9895894bd04d8875f1b8fdf0f0479b1e702cef326d2955c5c43
   languageName: node
   linkType: hard
 
