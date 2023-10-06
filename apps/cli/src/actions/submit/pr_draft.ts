@@ -14,4 +14,6 @@ export async function getPRDraftStatus(context: TContext): Promise<boolean> {
     ],
   });
   return response.draft === 'draft';
+
+  // Hi
 }
