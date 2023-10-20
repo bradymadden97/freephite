@@ -35,6 +35,8 @@ export const repoConfigFactory = spiffy({
         update((data) => (data.trunk = trunk));
       },
 
+      getTrunk: () => data.trunk,
+
       graphiteInitialized: (): boolean => !!data.trunk,
 
       getRepoHost: (): string => {
