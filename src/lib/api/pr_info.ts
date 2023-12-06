@@ -58,6 +58,38 @@ export async function getPrInfoForBranches(
   }
 
   const octokit = new Octokit({ auth });
+
+  const existingNewPrRequests = [];
+  for (const ref of branchesWithoutPrInfo.values()) {
+    existingNewPrRequests.push({
+      pr: octokit.request(
+        'GET /repos/{owner}/{repo}/pulls?head={owner}:{branch_name}',
+        {
+          owner: params.repoOwner,
+          repo: params.repoName,
+          branch_name: ref,
+          headers: {
+            'X-GitHub-Api-Version': '2022-11-28',
+          },
+        }
+      ),
+    });
+  }
+
+  await Promise.all(
+    existingNewPrRequests.map(({ pr }) =>
+      Promise.allSettled([pr]).then(([pr]) => {
+        if (pr.status === 'fulfilled' && pr.value.data.length > 0) {
+          existingPrInfo.set(
+            pr.value.data[0].number,
+            pr.value.data[0].head.ref
+          );
+        }
+        return;
+      })
+    )
+  );
+
   const requests = [];
 
   for (const pr of existingPrInfo.keys()) {
@@ -152,11 +184,6 @@ export async function getPrInfoForBranches(
       )
     )
   );
-
-  // TODO: Need to implement the same fetching for `branchesWithoutPrInfo`
-  // for (const ref of branchesWithoutPrInfo.values()) {
-  //   requests.push(...)
-  // }
 
   /** Filter nulls, typescript */
   const prs: TPRInfoToUpsert = [];
